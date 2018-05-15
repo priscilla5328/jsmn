@@ -19,8 +19,10 @@ char *readJSONFile() {
 		printf("Error!!!!!\n");
 		exit(1);
 	}
-	while(!feof(fp))
+
+	while(!feof(fp)){
 		printf("%c", fgetc(fp));
+	}
 	
 	fseek(fp, 0, SEEK_END);
 	Fsize = ftell(fp)+1;
@@ -34,7 +36,7 @@ char *readJSONFile() {
 
 	result = fread(buffer, 1, Fsize, fp);
 	if(result != Fsize){
-		fputs("Reading error", stderr);
+		printf("Reading error");
 		exit(3);
 	}
 	
