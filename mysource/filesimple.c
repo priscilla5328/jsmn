@@ -8,13 +8,14 @@
  * tokens is predictable.
  */
 
-char *readJSONFile() {
+
+char* readJSONFile() {
 	long Fsize;
 	char* buffer;
 	size_t result;
 	FILE* fp;
 
-	fp = fopen("data.json", "r");
+	fp = fopen("data.json", "rt");
 	if( fp == NULL ) {
 		printf("Error!!!!!\n");
 		exit(1);
@@ -23,7 +24,7 @@ char *readJSONFile() {
 	while(!feof(fp)){
 		printf("%c", fgetc(fp));
 	}
-	
+
 	fseek(fp, 0, SEEK_END);
 	Fsize = ftell(fp)+1;
 	rewind(fp); //save file size
@@ -34,24 +35,80 @@ char *readJSONFile() {
 		exit(2);
 	}
 
-	result = fread(buffer, 1, Fsize, fp);
-	if(result != Fsize){
+	fread(buffer, 1, Fsize, fp);
+	result = buffer;
+
+	//printf("%lu %lu\n", result+1, Fsize);
+
+	if(strlen(result) != Fsize-1){
 		printf("Reading error");
 		exit(3);
 	}
-	
+
 	fclose(fp);
 	free(buffer);
-	return result;
+	return (void *)result;
 }
 
-/*static const char *JSON_STRING =
-	"{\"user\": \"johndoe\", \"admin\": false, \"uid\": 1000,\n  "
-	"\"groups\": [\"users\", \"wheel\", \"audio\", \"video\"]}";
-	*/
+void jsonNameList(char* jsonstr, jsmntok_t *t, int tokcount, int *nameTokIndex){
+  int a=0, b=0, count=0;
+
+  for (a=0; a<tokcount; a++){
+    if((t[a].size == 1) && (t[a].type != JSMN_OBJECT) && (t[a].type != JSMN_ARRAY)){
+      nameTokIndex[b]=a;
+      //printf("a:%d nameTokIndex[b]:%d\n", a, nameTokIndex[b]);
+
+      count++;
+      b++;
+    }
+    nameTokIndex[b]=a+1;
+    //printf("a:%d nameTokIndex[b]:%d\n", a+1, nameTokIndex[b]);
+  }
+
+}
+
+void printNameList(char* jsonstr, jsmntok_t *t, int *nameTokIndex){
+  int i=0;
+
+  printf("***** Name List *****\n");
+  while(1){
+    if(nameTokIndex[i] == 0){
+      break;
+    }
+    else if(nameTokIndex[i] != 0){
+      printf("name[%d] %.*s\n", i+1, t[nameTokIndex[i]].end - t[nameTokIndex[i]].start, jsonstr + t[nameTokIndex[i]].start);
+      //printf("%d %d\n", jsonstr + t[nameTokIndex[i]].start, jsonstr);
+      //printf("%.*s\n", t[nameTokIndex[i+1]-1].end-t[nameTokIndex[i+1]-1].start, jsonstr+t[nameTokIndex[i+1]-1].start);
+      i++;
+      if(jsonstr + t[nameTokIndex[i]].start == jsonstr){
+        break;
+      }
+    }
+  }
+}
+
+void selectNameList(char* jsonstr, jsmntok_t *t, int* nameTokIndex){
+  int no, i;
+
+  while(1){
+    printf("Select Name's NO (exit:0) >> ");
+    scanf("%d", &no);
+
+    if(no == 0){
+      break;
+    }
+    else if((nameTokIndex[no-1] != 0) && (nameTokIndex[no] != 0)){
+      //printf("%d %d\n", nameTokIndex[no]-1, nameTokIndex[no]);
+
+      printf("name[%d] %.*s\n", no, t[nameTokIndex[no-1]].end-t[nameTokIndex[no-1]].start, jsonstr+t[nameTokIndex[no-1]].start);
+      printf("%.*s\n", t[nameTokIndex[no]-1].end-t[nameTokIndex[no]-1].start, jsonstr+t[nameTokIndex[no]-1].start);
+      //printf("%.*s\n", t[21].end-t[21].start, jsonstr+t[21].start);
+    }
+  }
+}
 
 static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
-	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
+	if (tok->type == JSMN_STRING && (int)strlen(s) == tok->end - tok->start &&
 			strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
 		return 0;
 	}
@@ -61,13 +118,13 @@ static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
 int main() {
 	int i;
 	int r;
+  int count;
+  int nameTokIndex[100]={0,};
 	jsmn_parser p;
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
 
 	char* JSON_STRING;
 	JSON_STRING = readJSONFile();
-
-//	printf(JSON_STRING);
 
 	jsmn_init(&p);
 	r = jsmn_parse(&p, JSON_STRING, strlen(JSON_STRING), t, sizeof(t)/sizeof(t[0]));
@@ -76,44 +133,18 @@ int main() {
 		return 1;
 	}
 
+
+
 	/* Assume the top-level element is an object */
 	if (r < 1 || t[0].type != JSMN_OBJECT) {
 		printf("Object expected\n");
 		return 1;
 	}
 
-	/* Loop over all keys of the root object */
-	for (i = 1; i < r; i++) {
-		if (jsoneq(JSON_STRING, &t[i], "user") == 0) {
-			/* We may use strndup() to fetch string value */
-			printf("- User: %.*s\n", t[i+1].end-t[i+1].start,
-					JSON_STRING + t[i+1].start);
-			i++;
-		} else if (jsoneq(JSON_STRING, &t[i], "admin") == 0) {
-			/* We may additionally check if the value is either "true" or "false" */
-			printf("- Admin: %.*s\n", t[i+1].end-t[i+1].start,
-					JSON_STRING + t[i+1].start);
-			i++;
-		} else if (jsoneq(JSON_STRING, &t[i], "uid") == 0) {
-			/* We may want to do strtol() here to get numeric value */
-			printf("- UID: %.*s\n", t[i+1].end-t[i+1].start,
-					JSON_STRING + t[i+1].start);
-			i++;
-		} else if (jsoneq(JSON_STRING, &t[i], "groups") == 0) {
-			int j;
-			printf("- Groups:\n");
-			if (t[i+1].type != JSMN_ARRAY) {
-				continue; /* We expect groups to be an array of strings */
-			}
-			for (j = 0; j < t[i+1].size; j++) {
-				jsmntok_t *g = &t[i+j+2];
-				printf("  * %.*s\n", g->end - g->start, JSON_STRING + g->start);
-			}
-			i += t[i+1].size + 1;
-		} else {
-			printf("Unexpected key: %.*s\n", t[i].end-t[i].start,
-					JSON_STRING + t[i].start);
-		}
-	}
+  jsonNameList(JSON_STRING, t, r, nameTokIndex);
+  printNameList(JSON_STRING, t, nameTokIndex);
+  selectNameList(JSON_STRING, t, nameTokIndex);
+
+
 	return EXIT_SUCCESS;
 }
