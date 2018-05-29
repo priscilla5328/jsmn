@@ -1,3 +1,5 @@
+//#define JSMN_PARENT_LINKS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,8 +56,8 @@ void jsonNameList(char* jsonstr, jsmntok_t *t, int tokcount, int *nameTokIndex){
   int a=0, b=0, count=0;
 
   for (a=0; a<tokcount; a++){
-		//printf("%d ", t[a].size);
-    if((t[a].size == 1) && (t[a].type != JSMN_OBJECT) && (t[a].type != JSMN_ARRAY)){
+		printf("parent%d ", t[a].parent);
+    if(t[a].parent == 0){
       nameTokIndex[b]=a;
 
       count++;
@@ -94,8 +96,7 @@ void printNameList(char* jsonstr, jsmntok_t *t, int *nameTokIndex){
       break;
     }else if(nameTokIndex[i] != 0){
       printf("name[%d] %.*s\n", i+1, t[nameTokIndex[i]].end - t[nameTokIndex[i]].start, jsonstr + t[nameTokIndex[i]].start);
-      //printf("%d %d\n", jsonstr + t[nameTokIndex[i]].start, jsonstr);
-      //printf("%.*s\n", t[nameTokIndex[i+1]-1].end-t[nameTokIndex[i+1]-1].start, jsonstr+t[nameTokIndex[i+1]-1].start);
+      //printf("%d\n", t[nameTokIndex[i]+1].parent);
       i++;
 			//printf("end %d    start %d\n", t[nameTokIndex[i]].end, t[nameTokIndex[i]].start);
 
@@ -118,8 +119,8 @@ void selectNameList(char* jsonstr, jsmntok_t *t, int* nameTokIndex){
       //printf("%d \n", nameTokIndex[no]-1);
 
       printf("name[%d] %.*s\n", no, t[nameTokIndex[no-1]].end-t[nameTokIndex[no-1]].start, jsonstr+t[nameTokIndex[no-1]].start);
-      printf("%.*s\n", t[nameTokIndex[no]-1].end-t[nameTokIndex[no]-1].start, jsonstr+t[nameTokIndex[no]-1].start);
-      //printf("%.*s\n", t[21].end-t[21].start, jsonstr+t[21].start);
+      printf("%.*s\n", t[nameTokIndex[no-1]+1].end-t[nameTokIndex[no-1]+1].start, jsonstr+t[nameTokIndex[no-1]+1].start);
+      //printf("%d %d\n", t[nameTokIndex[no]-1].start, t[nameTokIndex[no]-1].end);
     }
   }
 }
@@ -134,7 +135,7 @@ void selectObjectList(char* jsonstr, jsmntok_t *t, int* nameTokIndex, char* obj)
 		printf("Select Object's NO (exit:0) >> ");
 		scanf("%d", &no);
 		n = strlen(obj);
-		printf("n0:%d\n", n);//410
+
 
 		if(no == 0 || (t[nameTokIndex[no-1]].end < t[nameTokIndex[no-1]].start)){
 			break;
@@ -180,13 +181,13 @@ int main() {
 
 
 	/* Assume the top-level element is an object */
-	if (r < 1 || t[0].type != JSMN_ARRAY) {
+	if (r < 1 || t[0].type != JSMN_OBJECT) {
 		printf("Array expected\n");
 		return 1;
 	}
 
 	printObjectList(JSON_STRING, t, r, nameTokIndex);
-	selectObjectList(JSON_STRING, t, nameTokIndex, obj);
+	//selectObjectList(JSON_STRING, t, nameTokIndex, obj);
   jsonNameList(JSON_STRING, t, r, nameTokIndex);
   printNameList(JSON_STRING, t, nameTokIndex);
   selectNameList(JSON_STRING, t, nameTokIndex);
