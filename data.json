@@ -1,27 +1,14 @@
-{
-  "name": "hello!",
-  "data": {
-    "name": "jspiner",
-    "age": 8,
-    "birth": 1996
-  },
-  "friends": [
-    "john",
-    "smith",
-    "sam"
-  ],
-  "books": [
-    {
-      "name": "book1",
-      "price": 10000
-    },
-    {
-      "name": "book2",
-      "price": 15000
-    },
-    {
-      "name": "book3",
-      "price": 7000
-    }
-  ]
-}
+	[
+		{
+			"company": "농심",
+			"name": "신라면",
+			"price": 676,
+			"count": 4
+		},
+		{
+			"company": "팔도",
+			"name": "비빔면",
+			"price": 596,
+			"count": 5
+		}
+	]
