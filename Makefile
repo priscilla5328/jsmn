@@ -1,12 +1,12 @@
 # You can put your build options here
 -include config.mk
 
-all: libjsmn.a 
+all: libjsmn.a
 
 libjsmn.a: jsmn.o
 	$(AR) rc $@ $^
 
-%.o: %.c jsmn.h
+%.o: %.c productlist.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 test: test_default test_strict test_links test_strict_links
@@ -28,6 +28,9 @@ jsmn_test.o: jsmn_test.c libjsmn.a
 simple_example: mysource/filesimple.o libjsmn.a
 	$(CC) $(LDFLAGS) $^ -o $@
 
+simple: mysource/productlist.o libjsmn.a
+	$(CC) $(LDFLAGS) $^ -o $@
+
 jsondump: example/jsondump.o libjsmn.a
 	$(CC) $(LDFLAGS) $^ -o $@
 
@@ -38,4 +41,3 @@ clean:
 	rm -f jsondump
 
 .PHONY: all clean test
-
