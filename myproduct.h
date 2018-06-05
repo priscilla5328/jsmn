@@ -28,10 +28,10 @@ typedef enum {
 } jsmntype_t;
 
 typedef enum {
-	ORION = 0;
-	LOTTE = 1;
-	HAETAE = 2;
-	NOBRAND = 3;
+	ORION = 0,
+	LOTTE = 1,
+	HAETAE = 2,
+	NOBRAND = 3
 }company_t;
 
 typedef struct {

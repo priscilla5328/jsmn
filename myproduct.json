@@ -1,0 +1,29 @@
+{
+	"Snack":
+		[
+			{
+				"company": "ORION",
+				"name": "생크림 파이",
+				"price": 3980,
+				"count": 74
+			},
+			{
+				"company": "LOTTE",
+				"name": "쌀로별",
+				"price": 2380,
+				"count": 15380
+			},
+			{
+				"company": "HAETAE",
+				"name": "홈런볼",
+				"price": 4980,
+				"count": 19583
+			},
+			{
+				"company": "NOBRAND",
+				"name": "감자 칩",
+				"price": 980,
+				"count": 25566
+			}
+		]
+}
